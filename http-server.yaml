@@ -1,0 +1,28 @@
+---
+- hosts: all
+  remote_user: ec2-user
+  become: True
+  tasks:
+  - name: Ensure the HTTPd package is installed
+    yum:
+      name: httpd
+      state: present
+  - name: Ensure the HTTPd service is enabled and running
+    service:
+      name: httpd
+      state: started
+      enabled: True
+  - name: Set variable 'x' 
+    set_fact:
+      x: 'michel'
+  - name: Get variable 'x'
+    debug:
+      msg: '{{ x }}'
+  - name: Ensure the website is present and updated
+    template:
+      src: index.html.j2
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
+
