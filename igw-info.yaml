@@ -1,0 +1,13 @@
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: Gather facts about all Internet Gateways for an account or profile
+      ec2_vpc_igw_facts:
+        region: "{{ item }}"
+      register: igw_facts
+      with_items:
+       - eu-central-1
+       - eu-west-1
+    - name: Get variable 'igw_facts'
+      debug:
+        msg: '{{ igw_facts }}'
