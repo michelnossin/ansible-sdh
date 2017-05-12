@@ -1,0 +1,6 @@
+- name: Count processes running on the system
+  shell: ps | wc -l
+  register: processes_number
+- name: Print local running processes
+  debug:
+    msg: '{{ processes_number.stdout }}'

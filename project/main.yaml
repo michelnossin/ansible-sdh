@@ -1,0 +1,4 @@
+#!/usr/bin/env ansible-playbook
+---
+- include: playbooks/groups/database.yaml
+- include: playbooks/groups/webserver.yaml

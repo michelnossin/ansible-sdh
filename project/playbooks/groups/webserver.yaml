@@ -1,0 +1,4 @@
+- hosts: webserver
+  user: ec2-user
+  roles:
+  - common
