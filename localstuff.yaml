@@ -1,0 +1,22 @@
+- hosts: localhost
+  connection: local
+  vars:
+    - backup: True
+  tasks:
+    - name: Count processes running on the local system
+      local_action: shell ps | wc -l
+      register: local_processes_number
+    - name: Print local running processes
+      debug:
+        msg: '{{ local_processes_number.stdout }}'
+    - name: Is backup set
+      fail:
+        msg: "Set backup env first!"
+      when: backup is not defined
+    - name: Is michel is not set
+      local_action: shell echo "michel is NOT set"
+      when: michel is  not defined
+      notify: Some handler
+  handlers:
+    - name: Some handler
+      local_action: shell echo "I sm notified by missing michel"
