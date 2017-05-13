@@ -2,3 +2,4 @@
   user: ec2-user
   roles:
   - common
+  - webserver

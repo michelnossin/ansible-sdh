@@ -1,0 +1,15 @@
+---
+- name: Ensure HTTPd configuration is updated
+  copy:
+    src: website.conf
+    dest: /etc/httpd/conf.d
+  notify: Restart HTTPd
+  become: True
+- name: Ensure the website is present and updated
+  template:
+    src: index.html.j2
+    dest: /var/www/html/index.html
+    owner: root
+    group: root
+    mode: 0644
+  become: True
