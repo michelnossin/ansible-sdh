@@ -1,0 +1,47 @@
+- name: Create vpc
+  ec2_vpc_net:
+    state: present
+    name: "{{ vpc_name }}"
+    cidr_block: "{{ vpc_cidr }}"
+    region: "{{ vpc_region }}"
+    tags:
+      name: "{{ vpc_name }}"
+    tenancy: dedicated
+  register: vpc_id
+- name: Create public subnet az A
+  ec2_vpc_subnet:
+    state: present
+    az: "{{ vpc_subnets[0].az }}"
+    region: "{{ vpc_region }}"
+    vpc_id: "{{ vpc_id.vpc.id }}"
+    cidr: "{{ vpc_subnets[0].cidr }}"
+    tags: "{{ vpc_subnets[0].resource_tags }}"
+  register: vpc_subnet_public_a
+- name: Create public subnet az B
+  ec2_vpc_subnet:
+    state: present
+    az: "{{ vpc_subnets[1].az }}"
+    region: "{{ vpc_region }}"
+    vpc_id: "{{ vpc_id.vpc.id }}"
+    cidr: "{{ vpc_subnets[1].cidr }}"
+    tags: "{{ vpc_subnets[1].resource_tags }}"
+  register: vpc_subnet_public_b
+- name: Create private subnet az A
+  ec2_vpc_subnet:
+    state: present
+    az: "{{ vpc_subnets[2].az }}"
+    region: "{{ vpc_region }}"
+    vpc_id: "{{ vpc_id.vpc.id }}"
+    cidr: "{{ vpc_subnets[2].cidr }}"
+    tags: "{{ vpc_subnets[2].resource_tags }}"
+  register: vpc_subnet_private_a
+- name: Create private subnet az B
+  ec2_vpc_subnet:
+    state: present
+    az: "{{ vpc_subnets[3].az }}"
+    region: "{{ vpc_region }}"
+    vpc_id: "{{ vpc_id.vpc.id }}"
+    cidr: "{{ vpc_subnets[3].cidr }}"
+    tags: "{{ vpc_subnets[3].resource_tags }}"
+  register: vpc_subnet_private_b
+

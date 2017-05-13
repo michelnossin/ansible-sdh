@@ -1,0 +1,33 @@
+---
+
+project: sdh
+stage: prod
+keyfile: ~/.ssh/id_rsa.pub
+
+# EC2
+image: ami-f4cc1de2 # Ubuntu Server 16.04 LTS (HVM), SSD @ us-east-1
+instances_count: 1 # count per one subnet
+instances_type: t2.micro
+instances_data_size: 200
+instances_device_name: /dev/sda1
+
+# VPC
+vpc_region: eu-central-1
+vpc_name: "{{ project }}-{{ vpc_region }}-{{ stage }}-vpc"
+vpc_cidr: 172.22.0.0/16
+
+#SUBNETS
+vpc_subnets:
+  - cidr: 172.22.1.0/24 
+    az: "{{ vpc_region }}a"
+    resource_tags: { "Name": "{{ project }}-{{ vpc_region }}a-{{ stage }}-public" }
+  - cidr: 172.22.5.0/24 
+    az: "{{ vpc_region }}b"
+    resource_tags: { "Name": "{{ project }}-{{ vpc_region }}b-{{ stage }}-public" }
+  - cidr: 172.22.9.0/24 
+    az: "{{ vpc_region }}a"
+    resource_tags: { "Name": "{{ project }}-{{ vpc_region }}a-{{ stage }}-private" }
+  - cidr: 172.22.13.0/24 
+    az: "{{ vpc_region }}b"
+    resource_tags: { "Name": "{{ project }}-{{ vpc_region }}b-{{ stage }}-private" }
+#sg_name: "{{ project }}-security-group"
