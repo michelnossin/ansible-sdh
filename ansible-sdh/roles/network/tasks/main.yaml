@@ -44,4 +44,31 @@
     cidr: "{{ vpc_subnets[3].cidr }}"
     tags: "{{ vpc_subnets[3].resource_tags }}"
   register: vpc_subnet_private_b
-
+- name: Create and attach Internet Gatway
+  ec2_vpc_igw:
+    vpc_id: "{{ vpc_id.vpc.id }}"
+    state: present
+    region: "{{ vpc_region }}"
+    #tags:
+    #  name: "{{ vpc_igw }}"
+  register: igw
+- name: Create new nat gateway in public subnet AZ A and allocate new EIP
+  ec2_vpc_nat_gateway:
+    state: present
+    subnet_id: "{{ vpc_subnet_public_a.subnet.id }}" 
+    wait: yes
+    region: "{{ vpc_region }}"
+    #eip_address: "{{ eip_a.public_ip }}" 
+    eip_address: "35.157.101.229" 
+    if_exist_do_not_create: true
+  register: new_nat_gateway_a
+- name: Create new nat gateway in public subnet AZ B and allocate new EIP
+  ec2_vpc_nat_gateway:
+    state: present
+    subnet_id: "{{ vpc_subnet_public_b.subnet.id }}"         
+    wait: yes
+    region: "{{ vpc_region }}"
+    #eip_address: "{{ eip_b.public_ip }}" 
+    eip_address: "35.157.216.151" 
+    if_exist_do_not_create: true
+  register: new_nat_gateway_b 
