@@ -1,4 +1,9 @@
 ---
+# Sdh setup using ansible
+# v0.0 Michel Nossin May 14 2017
+#
+# Todo: subnets should use /20 instead of /24, as 250 nodes might be too low
+#
 
 project: sdh
 stage: prod
@@ -16,6 +21,9 @@ vpc_region: eu-central-1
 vpc_name: "{{ project }}-{{ vpc_region }}-{{ stage }}-vpc"
 vpc_cidr: 172.22.0.0/16
 vpc_igw: "{{ project }}-{{ vpc_region }}-{{ stage }}-igw"
+vpc_rt_public: "{{ project }}-{{ vpc_region }}-{{ stage }}-public-rt"
+vpc_rt_private_a: "{{ project }}-{{ vpc_region }}a-{{ stage }}-private-rt"
+vpc_rt_private_b: "{{ project }}-{{ vpc_region }}b-{{ stage }}-private-rt"
 
 #SUBNETS
 vpc_subnets:

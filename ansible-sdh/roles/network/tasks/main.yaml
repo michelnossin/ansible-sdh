@@ -1,3 +1,15 @@
+# Sdh Ansible setup
+# v0.0 : Michel Nossin 14 May 2017
+# 
+# Description:
+# Setup a base for the data hub. Scope for this sub playbook is all network related components like:
+# Vpc, subnet, gateways, routetables, routes, vpn. Should be high avaiable.
+#
+# todo remove hard coded eip address for each nat server , needed as there are no free eip left at this moment
+# todo Use with_items clause to clean up the playbook
+# todo removal of default route table runs but is still there
+# todo Vpn steps not added yet
+
 - name: Create vpc
   ec2_vpc_net:
     state: present
@@ -56,19 +68,66 @@
   ec2_vpc_nat_gateway:
     state: present
     subnet_id: "{{ vpc_subnet_public_a.subnet.id }}" 
-    wait: yes
+    #wait: yes
     region: "{{ vpc_region }}"
-    #eip_address: "{{ eip_a.public_ip }}" 
     eip_address: "35.157.101.229" 
     if_exist_do_not_create: true
-  register: new_nat_gateway_a
+  register: nat_gateway_a
 - name: Create new nat gateway in public subnet AZ B and allocate new EIP
   ec2_vpc_nat_gateway:
     state: present
     subnet_id: "{{ vpc_subnet_public_b.subnet.id }}"         
-    wait: yes
+    #wait: yes
     region: "{{ vpc_region }}"
-    #eip_address: "{{ eip_b.public_ip }}" 
     eip_address: "35.157.216.151" 
     if_exist_do_not_create: true
-  register: new_nat_gateway_b 
+  register: nat_gateway_b 
+- name: Retrieve the default route table from the vpc
+  ec2_vpc_route_table_facts:
+    region: "{{ vpc_region }}"
+    filters:
+      vpc-id: "{{ vpc_id.vpc.id }}"
+  register: default_public_route_table
+- name: Remove the default route table
+  ec2_vpc_route_table:
+    vpc_id: "{{ vpc_id.vpc.id }}"
+    region: "{{ vpc_region }}"
+    route_table_id: "{{ default_public_route_table.route_tables[0].id }}"
+    state: absent
+- name: Set up public subnet route table
+  ec2_vpc_route_table:
+    vpc_id: "{{ vpc_id.vpc.id }}"
+    region: "{{ vpc_region }}"
+    tags:
+      Name: "{{ vpc_rt_public }}"
+    subnets:
+      - "{{ vpc_subnet_public_a.subnet.id }}"
+      - "{{ vpc_subnet_public_b.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ igw.gateway_id }}"
+  register: public_route_table
+- name: Set up NAT-protected in AZ A private route table
+  ec2_vpc_route_table:
+    vpc_id: "{{ vpc_id.vpc.id }}"
+    region: "{{ vpc_region }}"
+    tags:
+      Name: "{{ vpc_rt_private_a }}"
+    subnets:
+      - "{{ vpc_subnet_private_a.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ nat_gateway_a.nat_gateway_id }}"
+  register: nat_route_table_a
+- name: Set up NAT-protected in AZ B private route table
+  ec2_vpc_route_table:
+    vpc_id: "{{ vpc_id.vpc.id }}"
+    region: "{{ vpc_region }}"
+    tags:
+      Name: "{{ vpc_rt_private_b }}"
+    subnets:
+      - "{{ vpc_subnet_private_b.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ nat_gateway_b.nat_gateway_id }}"
+  register: nat_route_table_b
